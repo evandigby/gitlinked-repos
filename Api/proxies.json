@@ -6,7 +6,7 @@
         "methods": [ "GET" ],
         "route": "/api/auth/authorize"
       },
-      "backendUri": "%service-url%/api/auth/authorize",
+      "backendUri": "%serviceurl%/api/auth/authorize",
       "requestOverrides": {
         "backend.request.querystring.code": "",
         "backend.request.querystring._code": "{request.querystring.code}"
