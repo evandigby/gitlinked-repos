@@ -55,16 +55,18 @@ namespace BlazorApp.Api
         {
             try
             {
-                var code = req.Query["code"].FirstOrDefault();
-                var returnUri = req.Query["return_uri"].SingleOrDefault();
+                if (!req.Query.TryGetValue("code", out var code) || !code.Any() || string.IsNullOrEmpty(code))
+                {
+                    return new BadRequestObjectResult("invalid code or no code found");
+                }
 
-                return new OkObjectResult(_gitHubInfo);
+                if (!req.Query.TryGetValue("return_uri", out var return_uri) || !return_uri.Any() || string.IsNullOrEmpty(code))
+                {
+                    return new BadRequestObjectResult("invalid return URI");
+                }
 
-                if (string.IsNullOrEmpty(code))
-                    return new RedirectResult("/");
-
-
-                var request = new OauthTokenRequest(_gitHubInfo.ClientID, _gitHubInfo.ClientSecret, code);
+                
+                var request = new OauthTokenRequest(_gitHubInfo.ClientID, _gitHubInfo.ClientSecret, code.FirstOrDefault());
                 var client = FreshGitHubClient();
                 var token = await client.Oauth.CreateAccessToken(request);
 
@@ -72,7 +74,7 @@ namespace BlazorApp.Api
                 req.HttpContext.Response.Cookies.Append(_gitHubInfo.GitHubAuthCookie, token.AccessToken);
                 req.HttpContext.Response.Cookies.Append(_gitHubInfo.GitHubAuthScopeCookie, string.Join(" ", token.Scope));
 
-                return new RedirectResult(returnUri, false);
+                return new RedirectResult(return_uri.FirstOrDefault(), false);
             }
             catch (Exception ex)
             {
