@@ -55,7 +55,7 @@ namespace BlazorApp.Api
         {
             try
             {
-                if (!req.Query.TryGetValue("code", out var code) || !code.Any() || string.IsNullOrEmpty(code))
+                if (!req.Query.TryGetValue("_code", out var code) || !code.Any() || string.IsNullOrEmpty(code))
                 {
                     return new BadRequestObjectResult("invalid code or no code found");
                 }
