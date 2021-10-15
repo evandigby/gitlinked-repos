@@ -1,0 +1,34 @@
+﻿@inject HttpClient client
+@inject IState state
+
+<h3>Repos</h3>
+
+@foreach (var repo in state.Repositories)
+{
+	<p>@repo.Name</p>
+}
+
+@code {
+	protected override void OnInitialized()
+    {
+        state.OnChange += GetRepos;
+    }
+
+	private async void GetRepos()
+	{
+		if (state.RepositoriesStale)
+		{
+			if (state.IsAuthenticated)
+			{
+				state.Repositories = await client.GetFromJsonAsync<IEnumerable<Repo>>("api/github/repos");
+			}
+			else
+			{
+				state.Repositories = Enumerable.Empty<Repo>();
+			}
+			state.RepositoriesStale = false;
+			StateHasChanged();
+		}
+	}
+
+}

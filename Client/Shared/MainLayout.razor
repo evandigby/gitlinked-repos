@@ -1,15 +1,45 @@
 ﻿@inherits LayoutComponentBase
+@inject IJSRuntime JsRuntime
+@inject IState state
 
-<div class="sidebar">
-    <NavMenu />
-</div>
 
 <div class="main">
     <div class="top-row px-4">
-        <a href="http://blazor.net" target="_blank" class="ml-md-auto">About</a>
+        @if (state.IsAuthenticated)
+        {
+            <button class="ml-md-auto">Logout</button>
+        }
+        else
+        {
+            <button @onclick=LoginClick class="ml-md-auto">Login</button>
+        }
     </div>
 
     <div class="content px-4">
         @Body
     </div>
 </div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        state.OnChange += StateHasChanged;
+    }
+    private async Task LoginClick(MouseEventArgs args)
+    {
+        var dotNetObjectReference = DotNetObjectReference.Create(this);
+        
+        await JsRuntime.InvokeVoidAsync("InteropFunctions.OpenAuthWindow", dotNetObjectReference);
+    }
+
+    [JSInvokable("Authenticated")]
+    public Task Authenticated(bool isAuthenticated)
+    {
+        state.IsAuthenticated = isAuthenticated;
+        state.RepositoriesStale = true;
+        state.NotifyStateChanged();
+        return Task.CompletedTask;
+    }
+}
