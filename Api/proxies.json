@@ -4,9 +4,9 @@
     "callback": {
       "matchCondition": {
         "methods": [ "GET" ],
-        "route": "/api/callback"
+        "route": "/api/auth/authorize"
       },
-      "backendUri": "http://localhost/auth/authorize",
+      "backendUri": "%service-url%/api/auth/authorize",
       "requestOverrides": {
         "backend.request.querystring.code": "",
         "backend.request.querystring._code": "{request.querystring.code}"
