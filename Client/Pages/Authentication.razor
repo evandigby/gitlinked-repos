@@ -24,7 +24,7 @@
             });
 
             var uri = new Uri($"{baseAddress}api/auth/login?{await queryParams.ReadAsStringAsync()}");
-            NavigationManager.NavigateTo(uri.ToString());
+            NavigationManager.NavigateTo(uri.ToString(), true);
         } 
         else if (Action == "authorized")
         {
