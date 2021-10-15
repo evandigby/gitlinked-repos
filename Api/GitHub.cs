@@ -58,13 +58,16 @@ namespace BlazorApp.Api
                 var code = req.Query["code"].FirstOrDefault();
                 var returnUri = req.Query["return_uri"].SingleOrDefault();
 
+                return new OkObjectResult(_gitHubInfo);
+
                 if (string.IsNullOrEmpty(code))
-                    return new RedirectResult("Index");
+                    return new RedirectResult("/");
 
 
                 var request = new OauthTokenRequest(_gitHubInfo.ClientID, _gitHubInfo.ClientSecret, code);
                 var client = FreshGitHubClient();
                 var token = await client.Oauth.CreateAccessToken(request);
+
 
                 req.HttpContext.Response.Cookies.Append(_gitHubInfo.GitHubAuthCookie, token.AccessToken);
                 req.HttpContext.Response.Cookies.Append(_gitHubInfo.GitHubAuthScopeCookie, string.Join(" ", token.Scope));
