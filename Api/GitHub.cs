@@ -53,21 +53,28 @@ namespace BlazorApp.Api
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "auth/authorize")] HttpRequest req,
             ILogger log)
         {
-            var code = req.Query["code"].FirstOrDefault();
-            var returnUri = req.Query["return_uri"].SingleOrDefault();
+            try
+            {
+                var code = req.Query["code"].FirstOrDefault();
+                var returnUri = req.Query["return_uri"].SingleOrDefault();
 
-            if (string.IsNullOrEmpty(code))
-                return new RedirectResult("Index");
+                if (string.IsNullOrEmpty(code))
+                    return new RedirectResult("Index");
 
 
-            var request = new OauthTokenRequest(_gitHubInfo.ClientID, _gitHubInfo.ClientSecret, code);
-            var client = FreshGitHubClient();
-            var token = await client.Oauth.CreateAccessToken(request);
+                var request = new OauthTokenRequest(_gitHubInfo.ClientID, _gitHubInfo.ClientSecret, code);
+                var client = FreshGitHubClient();
+                var token = await client.Oauth.CreateAccessToken(request);
 
-            req.HttpContext.Response.Cookies.Append(_gitHubInfo.GitHubAuthCookie, token.AccessToken);
-            req.HttpContext.Response.Cookies.Append(_gitHubInfo.GitHubAuthScopeCookie, string.Join(" ", token.Scope));
+                req.HttpContext.Response.Cookies.Append(_gitHubInfo.GitHubAuthCookie, token.AccessToken);
+                req.HttpContext.Response.Cookies.Append(_gitHubInfo.GitHubAuthScopeCookie, string.Join(" ", token.Scope));
 
-            return new RedirectResult(returnUri, false);
+                return new RedirectResult(returnUri, false);
+            }
+            catch (Exception ex)
+            {
+                return new BadRequestObjectResult($"{ex.Message}\r\n{ex.StackTrace}");
+            }
         }
 
         [FunctionName("repos")]
