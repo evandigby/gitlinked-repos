@@ -13,5 +13,8 @@ namespace BlazorApp.Client
         bool RepositoriesStale { get; set; }
         event Action OnChange;
         void NotifyStateChanged();
+        IEnumerable<Repo> SelectedRepositories { get; set; }
+        void AddRepository(params Repo[] toAdd);
+        void RemoveRepository(params Repo[] toRemove);
     }
 }

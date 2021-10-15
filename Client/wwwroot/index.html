@@ -6,13 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Blazor Starter</title>
     <base href="/" />
-    <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
     <link href="css/app.css" rel="stylesheet" />
+    <link rel="stylesheet" href="_content/Blazority/lib/clr/ui/clr-ui.min.css" />
+    <link rel="stylesheet" href="_content/Blazority/lib/clr/icons/clr-icons.min.css" />
+    <link rel="stylesheet" href="_content/Blazority/blazority.min.css" />
 
     <script>
         window.InteropFunctions = {
             OpenAuthWindow: function (callback) {
-                var popup = window.open('/authentication/login', 'GitHub Authentication', "width=400, height=400");
+                var left = window.screenX + (window.innerWidth / 2) - 200;
+                var top = window.screenY + (window.innerHeight / 2) - 250;
+
+                var popup = window.open('/authentication/login', 'GitHub Authentication', `width=400, height=500, left=${left}, top=${top}`);
 
                 var popupTick = setInterval(function () {
                     if (popup.closed) {
@@ -56,8 +61,10 @@
         <a class="dismiss">🗙</a>
     </div>
 
-    
 
+    <script src="_content/Blazority/lib/webcomponents/custom-elements/custom-elements.min.js"></script>
+    <script src="_content/Blazority/lib/clr/icons/clr-icons.min.js"></script>
+    <script src="_content/Blazority/blazority.min.js"></script>
     <script src="_framework/blazor.webassembly.js"></script>
 </body>
 

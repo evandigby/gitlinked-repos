@@ -1,20 +1,51 @@
 ﻿@inject HttpClient client
 @inject IState state
 
-<h3>Repos</h3>
-
-@foreach (var repo in state.Repositories)
+@if (!closed)
 {
-	<p>@repo.Name</p>
+	<Button OnClick="CloseSelection">Close Repo Selection</Button>
+	<Combobox ItemsAsync="@GetRepos" @bind-SelectedItem=selectedRepo ItemToText="r => r.Name">
+		<ItemTemplate>
+			@($"{context.Name}")
+		</ItemTemplate>
+	</Combobox>
+
+	@if (selectedRepo != null)
+	{
+		<RepoView Repository="selectedRepo" />
+		<Button OnClick="AddRepo">Add Repo</Button>
+	}
+}
+
+@foreach (var repo in state.SelectedRepositories)
+{
+	<RepoView Repository="repo" />
 }
 
 @code {
+	private Repo selectedRepo;
+	private bool closed;
+
 	protected override void OnInitialized()
     {
-        state.OnChange += GetRepos;
+        state.OnChange += StateHasChanged;
     }
 
-	private async void GetRepos()
+	private void CloseSelection(MouseEventArgs args)
+	{
+		closed = true;
+		StateHasChanged();
+	}
+
+	private void AddRepo(MouseEventArgs args)
+	{
+		if (selectedRepo == null)
+			return;
+
+		state.AddRepository(selectedRepo);
+	}
+
+	private async Task<ICollection<Repo>> GetRepos()
 	{
 		if (state.RepositoriesStale)
 		{
@@ -27,8 +58,9 @@
 				state.Repositories = Enumerable.Empty<Repo>();
 			}
 			state.RepositoriesStale = false;
-			StateHasChanged();
 		}
+
+		return state.Repositories.ToList();
 	}
 
 }

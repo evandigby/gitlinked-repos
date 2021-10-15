@@ -86,7 +86,15 @@ namespace BlazorApp.Api
 
             client.Credentials = new Credentials(authToken);
             var allRepos = await client.Repository.GetAllForCurrent();
-            return new OkObjectResult(allRepos.Select(r => new Repo { Name = r.FullName }));
+            return new OkObjectResult(allRepos.Select(r => new Repo { 
+                Id = r.Id,
+                Name = r.FullName ,
+                Description = r.Description,
+                Url = r.Url,
+                StargazersCount = r.StargazersCount,
+                Language = r.Language,
+                UpdatedAt = r.UpdatedAt
+            }));
         }
     }
 }

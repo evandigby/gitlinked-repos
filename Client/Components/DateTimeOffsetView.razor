@@ -1,0 +1,41 @@
+﻿<span>@DisplayValue</span>
+
+
+@code {
+	[Parameter]
+	public DateTimeOffset Value { get; set; }
+
+	public string DisplayValue 
+	{
+		get
+		{
+			if (Value == default)
+				return "";
+
+			var localValue = Value.ToLocalTime();
+
+			var nowOffset = DateTimeOffset.Now - localValue;
+			if (nowOffset < TimeSpan.FromMinutes(30))
+			{
+				return "minutes ago";
+			}
+
+			if (nowOffset < TimeSpan.FromHours(1))
+			{
+				return "an hour ago";
+			}
+
+			if (nowOffset < TimeSpan.FromHours(5))
+			{
+				return "a few hours ago";
+			}
+
+			if (nowOffset < TimeSpan.FromDays(1))
+			{
+				return "less than a day ago";
+			}
+
+			return Value.ToLocalTime().ToString("MMM  d");
+		}
+	}
+}
