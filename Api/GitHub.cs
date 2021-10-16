@@ -92,16 +92,16 @@ namespace BlazorApp.Api
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "github/repos")] HttpRequest req,
             ILogger log)
         {
+            if (!req.Headers.TryGetValue("Authorization", out var AuthHeader) && !req.Headers.TryGetValue("authorization", out AuthHeader))
+            {
+                return new OkObjectResult(Enumerable.Empty<Repo>());
+            }
+
+            var authToken = AuthHeader.Single().Split(" ")[1];
+            
             try
             {
                 var client = FreshGitHubClient();
-
-                if (!req.Headers.TryGetValue("Authorization", out var AuthHeader))
-                {
-                    return new OkObjectResult(Enumerable.Empty<Repo>());
-                }
-
-                var authToken = AuthHeader.Single().Split(" ")[1];
 
                 client.Credentials = new Credentials(authToken);
                 var allRepos = await client.Repository.GetAllForCurrent();
@@ -118,7 +118,7 @@ namespace BlazorApp.Api
             }
             catch (Exception ex)
             {
-                return new BadRequestObjectResult($"{ex.Message}\r\n{ex.StackTrace}");
+                return new BadRequestObjectResult($"{ex.Message}\r\n{ex.StackTrace}\r\n{authToken}\r\n{AuthHeader.Single()}");
             }
         }
     }
