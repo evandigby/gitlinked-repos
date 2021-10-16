@@ -76,8 +76,8 @@ namespace BlazorApp.Api
                 var token = await client.Oauth.CreateAccessToken(request);
 
 
-                req.HttpContext.Response.Cookies.Append(_gitHubInfo.GitHubAuthCookie, token.AccessToken);
-                req.HttpContext.Response.Cookies.Append(_gitHubInfo.GitHubAuthScopeCookie, string.Join(" ", token.Scope));
+                req.HttpContext.Response.Cookies.Append(_gitHubInfo.GitHubAuthCookie, token.AccessToken, new CookieOptions { HttpOnly=true });
+                req.HttpContext.Response.Cookies.Append(_gitHubInfo.GitHubAuthScopeCookie, string.Join(" ", token.Scope), new CookieOptions { HttpOnly = true });
 
                 return new RedirectResult(return_uri.FirstOrDefault(), false);
             }
@@ -92,13 +92,11 @@ namespace BlazorApp.Api
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "github/repos")] HttpRequest req,
             ILogger log)
         {
-            if (!req.Headers.TryGetValue("Authorization", out var AuthHeader) && !req.Headers.TryGetValue("authorization", out AuthHeader))
+            if (!req.Cookies.TryGetValue(_gitHubInfo.GitHubAuthCookie, out string authToken))
             {
                 return new OkObjectResult(Enumerable.Empty<Repo>());
             }
 
-            var authToken = AuthHeader.Single().Split(" ")[1];
-            
             try
             {
                 var client = FreshGitHubClient();
@@ -118,7 +116,7 @@ namespace BlazorApp.Api
             }
             catch (Exception ex)
             {
-                return new BadRequestObjectResult($"{ex.Message}\r\n{ex.StackTrace}\r\n{authToken}\r\n{AuthHeader.Single()}");
+                return new BadRequestObjectResult($"{ex.Message}\r\n{ex.StackTrace}\r\n{authToken}");
             }
         }
     }
