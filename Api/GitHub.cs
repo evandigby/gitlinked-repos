@@ -92,26 +92,34 @@ namespace BlazorApp.Api
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "github/repos")] HttpRequest req,
             ILogger log)
         {
-            var client = FreshGitHubClient();
-
-            if (!req.Headers.TryGetValue("Authorization", out var AuthHeader))
+            try
             {
-                return new OkObjectResult(Enumerable.Empty<Repo>());
+                var client = FreshGitHubClient();
+
+                if (!req.Headers.TryGetValue("Authorization", out var AuthHeader))
+                {
+                    return new OkObjectResult(Enumerable.Empty<Repo>());
+                }
+
+                var authToken = AuthHeader.Single().Split(" ")[1];
+
+                client.Credentials = new Credentials(authToken);
+                var allRepos = await client.Repository.GetAllForCurrent();
+                return new OkObjectResult(allRepos.Select(r => new Repo
+                {
+                    Id = r.Id,
+                    Name = r.FullName,
+                    Description = r.Description,
+                    Url = r.Url,
+                    StargazersCount = r.StargazersCount,
+                    Language = r.Language,
+                    UpdatedAt = r.UpdatedAt
+                }));
             }
-
-            var authToken = AuthHeader.Single().Split(" ")[1];
-
-            client.Credentials = new Credentials(authToken);
-            var allRepos = await client.Repository.GetAllForCurrent();
-            return new OkObjectResult(allRepos.Select(r => new Repo { 
-                Id = r.Id,
-                Name = r.FullName ,
-                Description = r.Description,
-                Url = r.Url,
-                StargazersCount = r.StargazersCount,
-                Language = r.Language,
-                UpdatedAt = r.UpdatedAt
-            }));
+            catch (Exception ex)
+            {
+                return new BadRequestObjectResult($"{ex.Message}\r\n{ex.StackTrace}");
+            }
         }
     }
 }
